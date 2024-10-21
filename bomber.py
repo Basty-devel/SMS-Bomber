@@ -23,7 +23,7 @@ def banner():
 
 def validate_mobile_number(mobile_number):
     """Validate if the mobile number is numeric and has the correct length (10 digits in this case)."""
-    if len(mobile_number) != 10 or not mobile_number.isdigit():
+    if len(mobile_number) > 20 or not mobile_number.isdigit():
         raise ValueError("Invalid mobile number. Please enter a 10-digit numeric mobile number.")
     return mobile_number
 
