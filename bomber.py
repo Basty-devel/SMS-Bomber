@@ -33,7 +33,7 @@ def choose_api():
         '3': "https://m.naaptol.com/faces/jsp/ajax/ajax.jsp?actionname=checkMobileUserExists&mobile="
     }
 
-    print("Choose an API from the options below:")
+    print("Choose an API from the options above:")
     for key, url in api_options.items():
         print(f"{key}. {url}")
 
@@ -75,7 +75,7 @@ def get_user_input():
     """Collects and validates user input."""
     try:
         number = input("Enter mobile number: ").strip()
-        if not number.isdigit() or len(number) != 10:  # Adjust condition for your use case
+        if not number.isdigit() or len(number) > 20:  # Adjust condition for your use case
             raise ValueError("Invalid mobile number. Please enter a 10-digit number.")
         
         count = int(input("Enter the number of messages: "))
