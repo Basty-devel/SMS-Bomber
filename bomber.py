@@ -1,12 +1,8 @@
-import urllib.request
-import urllib.error
-import platform
-import os
+import requests
 import time
-import sys
 
 def banner():
-    """Clear screen and display a banner."""
+    """Clear the screen and display a banner."""
     if platform.system().lower() == "windows":
         os.system("cls")
     else:
@@ -21,80 +17,81 @@ def banner():
 |  $$$$$$/| $$ \/  | $$|  $$$$$$/      | $$$$$$$/|  $$$$$$/| $$ \/  | $$| $$$$$$$/| $$$$$$$$| $$  | $$
  \______/ |__/     |__/ \______/       |_______/  \______/ |__/     |__/|_______/ |________/|__/  |__/
                                                                                                      
-                                   By : D3XBugg3R & N3S3                                                                                               
-    Note : We are NOT responsible for any damage caused by this script, Use at your own risk.
+                                   By : N3S3                                                                                               
+    Note : We are NOT responsible for any damage caused by this script. Use at your own risk.
 """)
 
-def choose_api():
-    """Prompt user to choose an API."""
-    api_options = {
-        '1': "https://securedapi.confirmtkt.com/api/platform/register?mobileNumber=",
-        '2': "http://t.justdial.com/api/india_api_write/10aug2016/sendvcode.php?mobile=",
-        '3': "https://m.naaptol.com/faces/jsp/ajax/ajax.jsp?actionname=checkMobileUserExists&mobile="
-    }
+def validate_mobile_number(mobile_number):
+    """Validate if the mobile number is numeric and has the correct length (10 digits in this case)."""
+    if len(mobile_number) != 10 or not mobile_number.isdigit():
+        raise ValueError("Invalid mobile number. Please enter a 10-digit numeric mobile number.")
+    return mobile_number
 
-    print("Choose an API from the options above:")
-    for key, url in api_options.items():
-        print(f"{key}. {url}")
-
-    choice = input("Please choose a number from the API options: ").strip()
-
-    if choice in api_options:
-        return api_options[choice]
-    else:
-        print("Invalid choice. Please select a number from 1-3.")
-        sys.exit(1)
-
-def send(number, count, delay, url):
-    """Send SMS requests using the chosen API."""
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-        'Accept-Encoding': 'none',
-        'Accept-Language': 'en-US,en;q=0.8',
-        'Connection': 'keep-alive'
-    }
-    result_url = url + number
-    request = urllib.request.Request(result_url, headers=headers)
-
-    for x in range(count):
-        banner()
-        print(f"Target Number          : {number}")
-        print(f"Number of Messages Sent: {x + 1}")
-        try:
-            with urllib.request.urlopen(request) as response:
-                print(f"Message sent successfully. Response: {response.status}")
-        except urllib.error.URLError as e:
-            print(f"Error: {e} occurred while sending message.")
-        except Exception as ex:
-            print(f"An unexpected error occurred: {ex}")
-        time.sleep(delay)
-
-def get_user_input():
-    """Collects and validates user input."""
+def validate_positive_integer(value, name):
+    """Validate if the input is a positive integer."""
     try:
-        number = input("Enter mobile number: ").strip()
-        if not number.isdigit() or len(number) > 20:  # Adjust condition for your use case
-            raise ValueError("Invalid mobile number. Please enter a 10-digit number.")
-        
-        count = int(input("Enter the number of messages: "))
-        delay = int(input("Enter delay time between messages (in seconds): "))
-        
-        if count <= 0 or delay < 0:
-            raise ValueError("Count and delay must be positive numbers.")
-        
-        return number, count, delay
-    except ValueError as ve:
-        print(f"Input Error: {ve}")
+        value = int(value)
+        if value <= 0:
+            raise ValueError
+    except ValueError:
+        raise ValueError(f"Invalid {name}. Please enter a positive integer for {name}.")
+    return value
+
+def send_sms(api_key, mobile_number, message, count, delay):
+    """Send SMS messages using the provided API key and parameters."""
+    url = "https://jyothidinesh-sms-sending-v1.p.rapidapi.com/site2sms.com/send"
+
+    headers = {
+        "x-rapidapi-key": api_key,
+        "x-rapidapi-host": "jyothidinesh-sms-sending-v1.p.rapidapi.com"
+    }
+
+    params = {
+        "mobile": mobile_number,
+        "message": message
+    }
+
+    for i in range(count):
+        try:
+            response = requests.get(url, headers=headers, params=params)
+
+            if response.status_code == 200:
+                print(f"SMS {i + 1} sent successfully.")
+                print("Response:", response.json())
+            else:
+                print(f"Failed to send SMS {i + 1}. Status code: {response.status_code}")
+                print("Response:", response.text)
+
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred: {e}")
+
+        if i < count - 1:
+            print(f"Waiting for {delay} seconds before sending the next SMS...")
+            time.sleep(delay)
+
+def main():
+    """Main function to get user inputs and trigger SMS sending."""
+    banner()
+
+    api_key = ""  # Replace with your actual API key
+
+    try:
+        mobile_number = input("Enter the mobile number: ")
+        mobile_number = validate_mobile_number(mobile_number)
+
+        message = input("Enter the message you want to send: ")
+
+        count = input("Enter the number of messages to send: ")
+        count = validate_positive_integer(count, "number of messages")
+
+        delay = input("Enter the delay in seconds between messages: ")
+        delay = validate_positive_integer(delay, "delay")
+
+        send_sms(api_key, mobile_number, message, count, delay)
+
+    except ValueError as e:
+        print(e)
         sys.exit(1)
 
-try:
-    banner()
-    api_url = choose_api()
-    number, count, delay = get_user_input()
-    send(number, count, delay, api_url)
-    sys.exit(0)
-except Exception as e:
-    print(f"Error: {e} occurred. Please restart the script.")
-    sys.exit(1)
+if __name__ == "__main__":
+    main()
