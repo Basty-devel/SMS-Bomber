@@ -55,7 +55,7 @@ SMS limits: You are limited to 1000 SMS per hour using the free plan of the API.
 Be aware of the laws and regulations regarding SMS usage in your country, and use this tool responsibly.
 Troubleshooting
 If you're getting an error message or if the SMS isn’t sent, check the following:
-Ensure the phone number format is correct (10 digits, numeric).
+Ensure the phone number format is correct (20 digits, numeric).
 Make sure your API key is properly pasted and you haven't exceeded your usage limits.
 Confirm that the delay between messages is a reasonable amount of time to avoid rate-limiting.
 License
